@@ -1,0 +1,33 @@
+name: Build and Push (NuGet)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  call-workflow:
+    uses: KyungHoon0126/dotnet-workflows/.github/workflows/build-and-push.yml@main
+    with:
+      projectFileName: 'WinXamlControls'
+      projectConfiguration: 'Release'
+      dotnetVersion: '6.0'
+    secrets: inherit
+
+  additional-job:
+    needs: call-workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Additional Step
+        run: echo "Additional step after the called workflow"
+
+      - name: Download NuGet Package
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-package
+          path: nuget-output
+
+      - name: List NuGet Packages
+        run: ls -R nuget-output
